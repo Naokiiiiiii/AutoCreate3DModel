@@ -13,4 +13,5 @@
 
 export const callS3 = async (event, context) => {
   console.log('hello world')
+  console.log('event', event)
 }

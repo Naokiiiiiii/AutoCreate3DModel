@@ -3,12 +3,28 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   auto-create-3d-demention
 
+Parameters:
+  MovieBucketName:
+    Type: String
+    Default: 'three-dementions-movie'
+  # ImageBucketName:
+  #   Type: String
+  #   Default: 'three-dementions-image'
+  # SqsQueueName:
+  #   Type: String
+  #   Default: 'three-dementions-sqs-image'
+
 Resources:
-  S3SampleBucket:
+  S3InputMovieBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: '3d-dementions-movie'
-  s3InputFunction:
+      BucketName: !Ref MovieBucketName
+  # S3InputImageBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref ImageBucketName
+  #   DependsOn: S3InputMovieBucket
+  S3InputFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
@@ -21,20 +37,17 @@ Resources:
       MemorySize: 128
       Timeout: 300
       Policies:
-        - S3ReadPolicy:
-            BucketName: '3d-dementions-movie'
-        - S3WritePolicy:
-            BucketName: '3d-dementions-movie'
+        - AWSLambdaBasicExecutionRole
       Events:
         S3UploadEvent:
           Type: S3
           Properties:
-            Bucket: '3d-dementions-movie'
+            Bucket: !Ref S3InputMovieBucket
             Events: s3:ObjectCreated:*
   Layer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: 3d-demention
+      LayerName: three-demention
       ContentUri: .
       CompatibleRuntimes:
         - nodejs18.x
