@@ -23,27 +23,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref ImageBucketName
-  CallFfmpegFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/
-      Handler: handlers.callFfmpeg
-      Runtime: nodejs18.x
-      Architectures:
-        - x86_64
-      Layers:
-        - !Ref Layer
-      MemorySize: 128
-      Timeout: 300
-      Policies:
-        - AWSLambdaBasicExecutionRole
-      Events:
-        S3UploadEvent:
-          Type: S3
-          Properties:
-            Bucket: !Ref MovieBucket
-            Events: s3:ObjectCreated:*
-  ConvertMovieToImageFunction:
+  ConvertMovieToImage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
@@ -56,10 +36,17 @@ Resources:
       MemorySize: 128
       Timeout: 300
       Policies:
+        - AWSLambdaBasicExecutionRole
         - S3ReadPolicy:
             BucketName: !Ref MovieBucket
         - S3WritePolicy:
             BucketName: !Ref ImageBucket
+      Events:
+        S3UploadEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref MovieBucket
+            Events: s3:ObjectCreated:*
   Layer:
     Type: AWS::Serverless::LayerVersion
     Properties:
