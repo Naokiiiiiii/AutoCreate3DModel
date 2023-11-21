@@ -69,3 +69,8 @@ Resources:
         - nodejs18.x
     Metadata:
       BuildMethod: makefile
+  SampleSNS:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: SampleSNSTopic
+      TopicName: SampleSNSTopic
