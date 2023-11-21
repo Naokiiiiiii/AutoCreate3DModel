@@ -56,8 +56,7 @@ Resources:
         - nodejs18.x
     Metadata:
       BuildMethod: makefile
-  SampleSNS:
-    Type: AWS::SNS::Topic
+  MacMiniSqsQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      DisplayName: SampleSNSTopic
-      TopicName: SampleSNSTopic
+      QueueName: !Ref SqsQueueName
