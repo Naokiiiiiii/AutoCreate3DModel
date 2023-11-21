@@ -6,29 +6,28 @@ Description: >
 Parameters:
   MovieBucketName:
     Type: String
-    Default: 'three-dementions-movie'
-  # ImageBucketName:
-  #   Type: String
-  #   Default: 'three-dementions-image'
+    Default: 'three-dementions-movie-dev'
+  ImageBucketName:
+    Type: String
+    Default: 'three-dementions-image-dev'
   # SqsQueueName:
   #   Type: String
   #   Default: 'three-dementions-sqs-image'
 
 Resources:
-  S3InputMovieBucket:
+  MovieBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref MovieBucketName
-  # S3InputImageBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Ref ImageBucketName
-  #   DependsOn: S3InputMovieBucket
-  S3InputFunction:
+  ImageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ImageBucketName
+  ConvertMovieToImage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: handlers.callS3
+      Handler: handlers.convertMovieToImage
       Runtime: nodejs18.x
       Architectures:
         - x86_64
@@ -38,11 +37,15 @@ Resources:
       Timeout: 300
       Policies:
         - AWSLambdaBasicExecutionRole
+        - S3ReadPolicy:
+            BucketName: !Ref MovieBucket
+        - S3WritePolicy:
+            BucketName: !Ref ImageBucket
       Events:
         S3UploadEvent:
           Type: S3
           Properties:
-            Bucket: !Ref S3InputMovieBucket
+            Bucket: !Ref MovieBucket
             Events: s3:ObjectCreated:*
   Layer:
     Type: AWS::Serverless::LayerVersion
@@ -53,3 +56,7 @@ Resources:
         - nodejs18.x
     Metadata:
       BuildMethod: makefile
+  MacMiniSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref SqsQueueName
